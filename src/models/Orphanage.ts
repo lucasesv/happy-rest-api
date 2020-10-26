@@ -29,6 +29,9 @@ export default class Orphanage {
   @Column()
   open_on_weekends: boolean;
 
+  @Column()
+  pending_approval: boolean;
+
   @OneToMany(
     () => Image,
     image => image.orphanage,

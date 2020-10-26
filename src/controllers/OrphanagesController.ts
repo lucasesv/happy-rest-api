@@ -10,9 +10,11 @@ export default {
   async index(request: Request, response: Response) {
     const orphanagesRepository = getRepository(Orphanage);
     
-    const orphanages = await orphanagesRepository.find({
-      relations: ['images']
-    });
+    const orphanages = await orphanagesRepository
+      .createQueryBuilder("orphanage")
+      .leftJoinAndSelect("orphanage.images", "images")
+      .where("orphanage.pending_approval = :pendingApproval", {pendingApproval: false})
+      .getMany();
 
     return response.json(orphanageView.renderMany(orphanages));
   },
@@ -39,6 +41,7 @@ export default {
       instructions,
       opening_hours,
       open_on_weekends,
+      pending_approval,
     } = request.body;
 
     const requestImages = request.files as Express.Multer.File[];
@@ -56,6 +59,7 @@ export default {
       instructions,
       opening_hours,
       open_on_weekends: open_on_weekends === 'true',
+      pending_approval: pending_approval === 'true',
       images,
     };
 
@@ -67,6 +71,7 @@ export default {
       instructions: Yup.string().required(),
       opening_hours: Yup.string().required(),
       open_on_weekends: Yup.boolean().required(),
+      pending_approval: Yup.boolean().required(),
       images: Yup.array(
         Yup.object().shape({
           path: Yup.string().required()
