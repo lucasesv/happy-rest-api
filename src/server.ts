@@ -3,6 +3,7 @@ import 'express-async-errors';
 import cors from 'cors';
 
 import errorHandler from './errors/handler';
+import './database/connection';
 
 const app = express();
 
