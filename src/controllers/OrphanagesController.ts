@@ -14,4 +14,13 @@ export default {
     return response.json(orphanageView.renderMany(orphanages));
   },
 
+  async show(request: Request, response: Response) {
+    const { id } = request.params;
+
+    const orphanagesRepository = getRepository(Orphanage);
+
+    const orphanage = await orphanagesRepository.findOneOrFail(id);
+
+    return response.json(orphanageView.render(orphanage));
+  },
 }
