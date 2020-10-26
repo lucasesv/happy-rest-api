@@ -10,7 +10,9 @@ export default {
   async index(request: Request, response: Response) {
     const orphanagesRepository = getRepository(Orphanage);
     
-    const orphanages = await orphanagesRepository.find();
+    const orphanages = await orphanagesRepository.find({
+      relations: ['images']
+    });
 
     return response.json(orphanageView.renderMany(orphanages));
   },
@@ -20,7 +22,10 @@ export default {
 
     const orphanagesRepository = getRepository(Orphanage);
 
-    const orphanage = await orphanagesRepository.findOneOrFail(id);
+    const orphanage = await orphanagesRepository.findOneOrFail(
+      id,
+      { relations: ['images'] },
+    );
 
     return response.json(orphanageView.render(orphanage));
   },
@@ -36,6 +41,11 @@ export default {
       open_on_weekends,
     } = request.body;
 
+    const requestImages = request.files as Express.Multer.File[];
+    const images = requestImages.map(image => {
+      return { path: image.filename };
+    });
+
     const orphanagesRepository = getRepository(Orphanage);
   
     const data = {
@@ -46,7 +56,8 @@ export default {
       instructions,
       opening_hours,
       open_on_weekends: open_on_weekends === 'true',
-    }
+      images,
+    };
 
     const schema = Yup.object().shape({
       name: Yup.string().required('Nome Obrigatório'), // Substitui o texto padrão do required
@@ -66,7 +77,7 @@ export default {
     await schema.validate(
       data,
       { abortEarly: false }
-    )
+    );
 
     const orphanage = orphanagesRepository.create(data);
   
@@ -75,5 +86,6 @@ export default {
     return response
       .status(201)
       .json(orphanage); 
-  }
+  },
+
 }
