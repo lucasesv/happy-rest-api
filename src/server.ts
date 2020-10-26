@@ -6,6 +6,7 @@ import errorHandler from './errors/handler';
 import routes from './routes';
 import './database/connection';
 
+
 const app = express();
 
 app.use(cors());
